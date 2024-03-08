@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "CMixtralEngine.h"
 
 // CMixralDemoOnWindowsDlg dialog
 class CMixralDemoOnWindowsDlg : public CDialogEx
@@ -11,7 +11,7 @@ class CMixralDemoOnWindowsDlg : public CDialogEx
 // Construction
 public:
 	CMixralDemoOnWindowsDlg(CWnd* pParent = nullptr);	// standard constructor
-
+	CMixtralEngine* pMixtralEngine;
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_MIXRALDEMOONWINDOWS_DIALOG };

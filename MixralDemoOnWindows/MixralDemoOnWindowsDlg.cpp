@@ -23,6 +23,10 @@ CMixralDemoOnWindowsDlg::CMixralDemoOnWindowsDlg(CWnd* pParent /*=nullptr*/)
 	, m_csSentiment(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
+	pMixtralEngine = new CMixtralEngine();
+	pMixtralEngine->loadModel("D:/mixtral-8x7b-instruct-v0.1.Q2_K.gguf");
+
 }
 
 void CMixralDemoOnWindowsDlg::DoDataExchange(CDataExchange* pDX)
@@ -99,7 +103,14 @@ void CMixralDemoOnWindowsDlg::OnBnClickedOk()
 	// TODO: Add your control notification handler code here
 	//CDialogEx::OnOK();
 	UpdateData(true);
-	m_csSentiment = m_csText;
+
+	CT2CA convertedString(m_csText);
+	std::string strText(convertedString);
+	std::string strSentiment = pMixtralEngine->getAnswer(strText);
+	CA2CT convertedString(strSentiment.c_str());
+	m_csSentiment = CString(convertedString);
+	
+	
 	UpdateData(false);
 }
 
@@ -107,5 +118,6 @@ void CMixralDemoOnWindowsDlg::OnBnClickedOk()
 void CMixralDemoOnWindowsDlg::OnBnClickedCancel()
 {
 	// TODO: Add your control notification handler code here
+	pMixtralEngine->releaseModel();
 	CDialogEx::OnCancel();
 }

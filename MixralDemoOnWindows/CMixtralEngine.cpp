@@ -118,8 +118,9 @@ static void llama_log_callback_logTee(ggml_log_level level, const char* text, vo
     LOG_TEE("%s", text);
 }
 
-CString CMixtralEngine::getAnswer(CString* pCsText)
+std::string CMixtralEngine::getAnswer(std::string strText)
 {
+    std::string result = "";
     // TODO: Add your implementation code here.
     while ((n_remain != 0 && !is_antiprompt) || params.interactive) {
         // predict
@@ -253,7 +254,7 @@ CString CMixtralEngine::getAnswer(CString* pCsText)
                     int n_eval = std::min(input_size - i, params.n_batch);
                     if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0))) {
                         LOG_TEE("%s : failed to eval\n", __func__);
-                        return 1;
+                        return NULL;
                     }
 
                     n_past_guidance += n_eval;
@@ -270,7 +271,7 @@ CString CMixtralEngine::getAnswer(CString* pCsText)
 
                 if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval, n_past, 0))) {
                     LOG_TEE("%s : failed to eval\n", __func__);
-                    return 1;
+                    return NULL;
                 }
 
                 n_past += n_eval;
@@ -338,7 +339,7 @@ CString CMixtralEngine::getAnswer(CString* pCsText)
             for (auto id : embd) {
                 const std::string token_str = llama_token_to_piece(ctx, id);
                 printf("%s", token_str.c_str());
-
+                result += token_str.c_str();
                 if (embd.size() > 1) {
                     input_tokens.push_back(id);
                 }
@@ -441,14 +442,14 @@ CString CMixtralEngine::getAnswer(CString* pCsText)
                 // color user input only
                 console::set_display(console::user_input);
                 display = params.display_prompt;
-
-                std::string line;
-                bool another_line = true;
-                do {
-                    another_line = console::readline(line, params.multiline_input);
-                    buffer += line;
-                } while (another_line);
-
+                buffer = strText;
+                //std::string line;
+                //bool another_line = true;
+                //do {
+                //    another_line = console::readline(line, params.multiline_input);
+                //    buffer += line;
+                //} while (another_line);
+                return result;
                 // done taking input, reset color
                 console::set_display(console::reset);
                 display = true;
@@ -542,9 +543,9 @@ CString CMixtralEngine::getAnswer(CString* pCsText)
         }
     }
 
-    return CString();
+    return NULL;
 }
-bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
+bool CMixtralEngine::loadModel(std::string strModelPath = "", int nMode = 0) {
     
     g_params = &(this->params);
     int argc = 0;
@@ -552,6 +553,7 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
     if (!gpt_params_parse(argc, argv, this->params)) {
         return 1;
     }
+    this->params.model = strModelPath;
     this->params.instruct = true;
     llama_sampling_params& sparams = this->params.sparams;
 
@@ -617,9 +619,8 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
     llama_backend_init();
     llama_numa_init(this->params.numa);
 
-    llama_model* model;
-    llama_context* ctx;
-    llama_context* ctx_guidance = NULL;
+
+    this->ctx_guidance = NULL;
     g_model = &model;
     g_ctx = &ctx;
 
@@ -636,8 +637,8 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
         return 1;
     }
 
-    const int n_ctx_train = llama_n_ctx_train(model);
-    const int n_ctx = llama_n_ctx(ctx);
+    n_ctx_train = llama_n_ctx_train(model);
+    n_ctx = llama_n_ctx(ctx);
     LOG("n_ctx: %d\n", n_ctx);
 
     if (n_ctx > n_ctx_train) {
@@ -651,8 +652,6 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
         LOG_TEE("%s\n", get_system_info(this->params).c_str());
     }
 
-    std::string path_session = this->params.path_prompt_cache;
-    std::vector<llama_token> session_tokens;
 
     if (!path_session.empty()) {
         LOG_TEE("%s: attempting to load saved session from '%s'\n", __func__, path_session.c_str());
@@ -679,7 +678,7 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
     const bool add_bos = llama_should_add_bos_token(model);
     LOG("add_bos: %d\n", add_bos);
 
-    std::vector<llama_token> embd_inp;
+
 
     if (this->params.interactive_first || this->params.instruct || this->params.chatml || !this->params.prompt.empty() || session_tokens.empty()) {
         LOG("tokenize the prompt\n");
@@ -703,9 +702,7 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
     }
 
     // Tokenize negative prompt
-    std::vector<llama_token> guidance_inp;
-    int guidance_offset = 0;
-    int original_prompt_len = 0;
+
     if (ctx_guidance) {
         LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
 
@@ -775,15 +772,15 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
     }
 
     // prefix & suffix for instruct mode
-    const auto inp_pfx = ::llama_tokenize(ctx, "\n\n### Instruction:\n\n", add_bos, true);
-    const auto inp_sfx = ::llama_tokenize(ctx, "\n\n### Response:\n\n", false, true);
+    inp_pfx = ::llama_tokenize(ctx, "\n\n### Instruction:\n\n", add_bos, true);
+    inp_sfx = ::llama_tokenize(ctx, "\n\n### Response:\n\n", false, true);
 
     LOG("inp_pfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, inp_pfx).c_str());
     LOG("inp_sfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, inp_sfx).c_str());
 
     // chatml prefix & suffix
-    const auto cml_pfx = ::llama_tokenize(ctx, "\n<|im_start|>user\n", add_bos, true);
-    const auto cml_sfx = ::llama_tokenize(ctx, "<|im_end|>\n<|im_start|>assistant\n", false, true);
+    cml_pfx = ::llama_tokenize(ctx, "\n<|im_start|>user\n", add_bos, true);
+    cml_sfx = ::llama_tokenize(ctx, "<|im_end|>\n<|im_start|>assistant\n", false, true);
 
     LOG("cml_pfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, cml_pfx).c_str());
     LOG("cml_sfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, cml_sfx).c_str());
@@ -926,16 +923,16 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
         is_interacting = this->params.interactive_first;
     }
 
-    bool is_antiprompt = false;
-    bool input_echo = true;
-    bool display = true;
-    bool need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
+    this->is_antiprompt = false;
+    this->input_echo = true;
+    this->display = true;
+    this->need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
 
-    int n_past = 0;
-    int n_remain = this->params.n_predict;
-    int n_consumed = 0;
-    int n_session_consumed = 0;
-    int n_past_guidance = 0;
+    this->n_past = 0;
+    this->n_remain = this->params.n_predict;
+    this->n_consumed = 0;
+    this->n_session_consumed = 0;
+    this->n_past_guidance = 0;
 
     std::vector<int>   input_tokens;  g_input_tokens = &input_tokens;
     std::vector<int>   output_tokens; g_output_tokens = &output_tokens;
@@ -945,18 +942,14 @@ bool CMixtralEngine::loadModel(CString* pCsModelPath, int nMode = 0) {
     console::set_display(console::prompt);
     display = this->params.display_prompt;
 
-    std::vector<llama_token> embd;
-    std::vector<llama_token> embd_guidance;
 
-    // tokenized antiprompts
-    std::vector<std::vector<llama_token>> antiprompt_ids;
 
     antiprompt_ids.reserve(this->params.antiprompt.size());
     for (const std::string& antiprompt : this->params.antiprompt) {
         antiprompt_ids.emplace_back(::llama_tokenize(ctx, antiprompt, false, true));
     }
 
-    struct llama_sampling_context* ctx_sampling = llama_sampling_init(sparams);
+    ctx_sampling = llama_sampling_init(sparams);
 
 }
 
