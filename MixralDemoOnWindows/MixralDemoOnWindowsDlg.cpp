@@ -103,7 +103,7 @@ void CMixralDemoOnWindowsDlg::OnBnClickedOk()
 	// TODO: Add your control notification handler code here
 	//CDialogEx::OnOK();
 	UpdateData(true);
-
+	int  test = 0;
 	CT2CA convertedString(m_csText);
 	std::string strText(convertedString);
 	std::string strSentiment = pMixtralEngine->getAnswer(strText);
