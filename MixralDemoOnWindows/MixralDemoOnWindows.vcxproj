@@ -88,14 +88,16 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>..\..\..\..\common\Debug\common.lib;..\..\..\..\llama\llama.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -193,10 +195,19 @@
     <ClInclude Include="common\stb_image.h" />
     <ClInclude Include="common\train.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ggml-alloc.h" />
+    <ClInclude Include="ggml-backend-impl.h" />
+    <ClInclude Include="ggml-backend.h" />
+    <ClInclude Include="ggml-cuda.h" />
+    <ClInclude Include="ggml-impl.h" />
+    <ClInclude Include="ggml-metal.h" />
+    <ClInclude Include="ggml-mpi.h" />
+    <ClInclude Include="ggml-quants.h" />
+    <ClInclude Include="ggml-vulkan-shaders.hpp" />
     <ClInclude Include="ggml.h" />
+    <ClInclude Include="llama.h" />
     <ClInclude Include="MixralDemoOnWindows.h" />
     <ClInclude Include="MixralDemoOnWindowsDlg.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -208,21 +219,17 @@
     <ClCompile Include="common\grammar-parser.cpp" />
     <ClCompile Include="common\sampling.cpp" />
     <ClCompile Include="common\train.cpp" />
-    <ClCompile Include="ggml.c" />
     <ClCompile Include="MixralDemoOnWindows.cpp" />
     <ClCompile Include="MixralDemoOnWindowsDlg.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MixralDemoOnWindows.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="common\build-info.cpp.in" />
+    <None Include="ggml-cuda.cu" />
+    <None Include="ggml-metal.m" />
+    <None Include="ggml-metal.metal" />
     <None Include="res\MixralDemoOnWindows.rc2" />
   </ItemGroup>
   <ItemGroup>

@@ -121,6 +121,8 @@ static void llama_log_callback_logTee(ggml_log_level level, const char* text, vo
 std::string CMixtralEngine::getAnswer(std::string strText)
 {
     std::string result = "";
+
+    
     // TODO: Add your implementation code here.
     while ((n_remain != 0 && !is_antiprompt) || params.interactive) {
         // predict
@@ -251,7 +253,7 @@ std::string CMixtralEngine::getAnswer(std::string strText)
                 }
 
                 for (int i = 0; i < input_size; i += params.n_batch) {
-                    int n_eval = std::min(input_size - i, params.n_batch);
+                    int n_eval = min(input_size - i, params.n_batch);
                     if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0))) {
                         LOG_TEE("%s : failed to eval\n", __func__);
                         return NULL;
@@ -545,7 +547,7 @@ std::string CMixtralEngine::getAnswer(std::string strText)
 
     return NULL;
 }
-bool CMixtralEngine::loadModel(std::string strModelPath = "", int nMode = 0) {
+bool CMixtralEngine::loadModel(std::string strModelPath,  int nMode) {
     
     g_params = &(this->params);
     int argc = 0;
@@ -891,8 +893,8 @@ bool CMixtralEngine::loadModel(std::string strModelPath = "", int nMode = 0) {
     // number of grouped KV tokens so far (used only if params.grp_attn_n > 1)
     int ga_i = 0;
 
-    const int ga_n = this->params.grp_attn_n;
-    const int ga_w = this->params.grp_attn_w;
+    ga_n = this->params.grp_attn_n;
+    ga_w = this->params.grp_attn_w;
 
     if (ga_n != 1) {
         GGML_ASSERT(ga_n > 0 && "grp_attn_n must be positive");                     // NOLINT

@@ -9,7 +9,7 @@ class CMixtralEngine
 {
 public:
 	std::string getAnswer(std::string strText);
-	bool loadModel(std::string strsModelPath = "", int nMode = 0);
+	bool loadModel(std::string strsModelPath, int nMode = 0);
 	int releaseModel();
 	
 	gpt_params params;

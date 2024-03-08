@@ -30,9 +30,6 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CMixtralEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,15 +60,42 @@
     <ClInclude Include="ggml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ggml-alloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-backend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-backend-impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-cuda.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-metal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-mpi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-quants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ggml-vulkan-shaders.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llama.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MixralDemoOnWindows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MixralDemoOnWindowsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CMixtralEngine.cpp">
@@ -95,9 +119,6 @@
     <ClCompile Include="common\train.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ggml.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MixralDemoOnWindows.rc">
@@ -109,6 +130,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="common\build-info.cpp.in" />
+    <None Include="ggml-cuda.cu" />
+    <None Include="ggml-metal.m" />
+    <None Include="ggml-metal.metal" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MixralDemoOnWindows.ico">

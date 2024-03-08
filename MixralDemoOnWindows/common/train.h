@@ -6,8 +6,8 @@
 #include <random>
 #include <vector>
 
-#include "ggml.h"
-#include "llama.h"
+#include "../ggml.h"
+#include "../llama.h"
 
 #define LLAMA_TRAIN_MAX_NODES 16384
 
