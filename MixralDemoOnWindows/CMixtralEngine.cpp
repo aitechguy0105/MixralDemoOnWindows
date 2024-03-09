@@ -121,7 +121,7 @@ static void llama_log_callback_logTee(ggml_log_level level, const char* text, vo
 std::string CMixtralEngine::getAnswer(std::string strText)
 {
     std::string result = "";
-
+    bool bInputText = false;
     
     // TODO: Add your implementation code here.
     while ((n_remain != 0 && !is_antiprompt) || params.interactive) {
@@ -340,7 +340,7 @@ std::string CMixtralEngine::getAnswer(std::string strText)
         if (input_echo && display) {
             for (auto id : embd) {
                 const std::string token_str = llama_token_to_piece(ctx, id);
-                printf("%s", token_str.c_str());
+                //printf("%s", token_str.c_str());
                 result += token_str.c_str();
                 if (embd.size() > 1) {
                     input_tokens.push_back(id);
@@ -424,7 +424,20 @@ std::string CMixtralEngine::getAnswer(std::string strText)
             if (n_past > 0 && is_interacting) {
                 LOG("waiting for user input\n");
 
+
+                if (bInputText) {
+                    if (is_interacting) {
+                        llama_sampling_reset(ctx_sampling);
+                    }
+                    is_interacting = false;
+                    return result;
+                }
+
                 if (params.instruct || params.chatml) {
+                    
+              
+                    
+
                     printf("\n> ");
                 }
 
@@ -444,14 +457,16 @@ std::string CMixtralEngine::getAnswer(std::string strText)
                 // color user input only
                 console::set_display(console::user_input);
                 display = params.display_prompt;
+
                 buffer = strText;
+                bInputText = true;
                 //std::string line;
                 //bool another_line = true;
                 //do {
                 //    another_line = console::readline(line, params.multiline_input);
                 //    buffer += line;
                 //} while (another_line);
-                return result;
+                
                 // done taking input, reset color
                 console::set_display(console::reset);
                 display = true;
