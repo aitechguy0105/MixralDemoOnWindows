@@ -90,8 +90,8 @@ struct gpt_params {
     std::string prompt            = "";
     std::string prompt_file       = "";  // store the external prompt file name
     std::string path_prompt_cache = "";  // path to file for saving/loading prompt eval state
-    std::string input_prefix      = "Analyse sentiment of following TEXT. \nTEXT: ";  // string to prefix user inputs with
-    std::string input_suffix      = "Your answer MUST be one of positve, neutral or negative. Sentiment: ";  // string to suffix user inputs with
+    std::string input_prefix = "Your task is to analyze the sentiment of following TEXT.\nTEXT: ";  // string to prefix user inputs with
+    std::string input_suffix = "Your answer MUST be only one out of the following sentiments: [positive, negative, neutral, mixed].\nOnly give me the specific sentiment name after this prompt and nothing else.\nSentiment: ";  // string to suffix user inputs with
     std::vector<std::string> antiprompt; // string upon seeing which more user input is prompted
     std::string logdir            = "";  // directory in which to save YAML log files
     std::string logits_file       = "";  // file for saving *all* logits

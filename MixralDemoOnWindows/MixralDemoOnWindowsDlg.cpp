@@ -106,6 +106,7 @@ void CMixralDemoOnWindowsDlg::OnBnClickedOk()
 	int  test = 0;
 	CT2CA convertedString(m_csText);
 	std::string strText(convertedString);
+	strText += "\n";
 	std::string strSentiment = pMixtralEngine->getAnswer(strText);
 	CA2CT convertedCString(strSentiment.c_str());
 	m_csSentiment = CString(convertedCString);
